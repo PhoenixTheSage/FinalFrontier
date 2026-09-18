@@ -1,12 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+  <!-- VS 17 MSBuild (ReSharper / Build Tools) cannot resolve .NET 10's
+       WorkloadAutoImportPropsLocator. This plugin does not use workloads. -->
+  <PropertyGroup>
+    <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>ClientPlugin</RootNamespace>
-    <AssemblyName>ClientPluginTemplate</AssemblyName>
+    <AssemblyName>FinalFrontier</AssemblyName>
     <LangVersion>14</LangVersion>
       
-    <!-- Target platforms on Windows and Linux -->
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">net48;net10.0</TargetFrameworks>
+    <!-- Target platforms on Windows and Linux.
+         VS 17 / ReSharper Build Tools MSBuild cannot host .NET 10 SDK tasks, so Full
+         Framework MSBuild builds net48 only. `dotnet build` still builds both. -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows')) and '$(MSBuildRuntimeType)' == 'Core'">net48;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows')) and '$(MSBuildRuntimeType)' != 'Core'">net48</TargetFrameworks>
     <TargetFramework Condition="!$([MSBuild]::IsOSPlatform('Windows'))">net10.0</TargetFramework>
       
     <!-- Ensure SDK generates assembly attributes (no need for AssemblyInfo) -->
@@ -297,6 +306,11 @@
              Text="No Pulsar plugin folder for the $(TargetFramework) build under &quot;$(Pulsar)&quot;, skipping its deployment." />
 
     <MakeDir Condition="'$(PluginDirectory)' != ''" Directories="$(PluginDirectory)" />
+    <ItemGroup>
+      <CelestialAssets Include="$(RepoRoot)Assets\**\*" />
+    </ItemGroup>
+    <Copy Condition="'$(PluginDirectory)' != ''" SourceFiles="@(CelestialAssets)"
+          DestinationFiles="@(CelestialAssets->'$(PluginDirectory)\Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy Condition="'$(PluginDirectory)' != ''"
           SourceFiles="$(TargetPath)" DestinationFiles="$(PluginDirectory)$(PathSeparator)plugin.dll" />
     <Copy Condition="'$(PluginDirectory)' != '' And Exists('$(TargetDir)$(TargetName).pdb')"
@@ -306,4 +320,5 @@
     <Message Condition="'$(PluginDirectory)' != ''" Importance="high"
              Text="Deployed the $(TargetFramework) build to &quot;$(PluginDirectory)&quot;" />
   </Target>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

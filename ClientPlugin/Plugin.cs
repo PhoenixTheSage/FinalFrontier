@@ -1,59 +1,60 @@
-﻿using System.Reflection;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Reflection;
+using ClientPlugin.Integration;
 using ClientPlugin.Settings;
 using ClientPlugin.Settings.Layouts;
-using HarmonyLib;
 using Sandbox.Graphics.GUI;
 using VRage.Plugins;
 
-// Define assembly version when compiled by Pulsar
 #if !LOCAL_BUILD
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 #endif
-    
 namespace ClientPlugin;
 
-// ReSharper disable once UnusedType.Global
-public class Plugin : IPlugin
+public sealed class Plugin : IPlugin
 {
-    public const string Name = "ClientPluginTemplate";
+    public const string Name = "FinalFrontier";
     public static Plugin Instance { get; private set; }
-    private SettingsGenerator settingsGenerator;
-
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    SettingsGenerator settings;
+    public void LoadAssets(IReadOnlyDictionary<string, string> assets)
+    {
+        if (assets.TryGetValue("Celestial", out var root)) { AnomalyBridge.SetAssets(root); AtmosphereBridge.SetAssets(root); }
+    }
     public void Init(object gameInstance)
     {
         Instance = this;
-        Instance.settingsGenerator = new SettingsGenerator();
-
-        // TODO: Put your one time initialization code here.
-        var harmony = new Harmony(Name);
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        settings = new SettingsGenerator();
+        Config.Current.PropertyChanged += Changed;
+        AnomalyBridge.Update();
+        AtmosphereBridge.Update();
     }
-
-    public void Dispose()
+    static void Changed(object sender, PropertyChangedEventArgs args)
     {
-        // TODO: Save state and close resources here, called when the game exits (not guaranteed!)
-        // IMPORTANT: Do NOT call harmony.UnpatchAll() here! It may break other plugins.
-
-        Instance = null;
+        ConfigStorage.Save(Config.Current);
+        AnomalyBridge.MarkDirty();
+        if(args.PropertyName.StartsWith("Fog") || args.PropertyName.StartsWith("Atmosphere")) AtmosphereBridge.Changed();
     }
-
     public void Update()
     {
-        // TODO: Put your update code here. It is called on every simulation frame!
+        ConfigStorage.FlushPending();
+        AnomalyBridge.Update();
+        AtmosphereBridge.Update();
     }
-
-    // ReSharper disable once UnusedMember.Global
+    public void Dispose()
+    {
+        Config.Current.PropertyChanged -= Changed;
+        ConfigStorage.FlushPending(true);
+        AtmosphereBridge.Dispose();
+        AnomalyBridge.Dispose();
+        Instance = null;
+    }
     public void OpenConfigDialog()
     {
-        Instance.settingsGenerator.SetLayout<Simple>();
-        MyGuiSandbox.AddScreen(Instance.settingsGenerator.Dialog);
+        if (settings == null) return;
+        settings.SetLayout<Simple>();
+        settings.Dialog.RecreateControls(true);
+        MyGuiSandbox.AddScreen(settings.Dialog);
     }
-
-    //TODO: Uncomment and use this method to load asset files
-    /*public void LoadAssets(string folder)
-    {
-
-    }*/
 }

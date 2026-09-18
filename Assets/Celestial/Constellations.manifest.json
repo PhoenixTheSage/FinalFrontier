@@ -1,0 +1,17 @@
+{
+  "figures": [
+    "Orion",
+    "Ursa Major",
+    "Cassiopeia",
+    "Cygnus",
+    "Crux",
+    "Leo",
+    "Taurus",
+    "Scorpius",
+    "Centaurus"
+  ],
+  "edges": 49,
+  "members": 54,
+  "binary_sha256": "4a8bea35f936cb557eb5cd4ca9a28a8333511a66ff86bd1e304244b95b5856e5",
+  "credit": "Curated stick figures; star positions Credit: ESA Hipparcos"
+}

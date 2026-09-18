@@ -1,0 +1,11 @@
+{
+  "source": "https://vizier.cds.unistra.fr/viz-bin/asu-tsv?-source=I/239/hip_main&-out=HIP,Vmag,RAICRS,DEICRS,B-V&Vmag=%3C%3D8&-out.max=unlimited",
+  "source_sha256": "aca753e8c15054fb5e58254674c451da33fc2d82522d308fc4255aefd6de637e",
+  "stars": 41394,
+  "magnitude_limit": 8,
+  "frame": "ICRS; epoch J1991.25; +X RA 0, +Y north, +Z RA 90",
+  "grid": 32,
+  "binary_sha256": "e28bb2d35ee51cfb2f66f37408bed66daec509f4b6b518f1d4517cee92d4d556",
+  "credit": "Credit: ESA",
+  "license": "CC BY-NC 3.0 IGO"
+}

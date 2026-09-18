@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion><PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="VRage.Math"><HintPath>$(Bin64)\VRage.Math.dll</HintPath></Reference>
+    <Compile Include="../ClientPlugin/Celestial/StarCatalogue.cs" Link="StarCatalogue.cs" />
+    <Compile Include="../ClientPlugin/Celestial/ConstellationGuide.cs" Link="ConstellationGuide.cs" />
+    <Reference Include="SharpDX"><HintPath>$(Bin64)\SharpDX.dll</HintPath></Reference>
+    <Reference Include="SharpDX.Direct3D11"><HintPath>$(Bin64)\SharpDX.Direct3D11.dll</HintPath></Reference>
+    <Reference Include="SharpDX.DXGI"><HintPath>$(Bin64)\SharpDX.DXGI.dll</HintPath></Reference>
+    <Reference Include="SharpDX.D3DCompiler"><HintPath>$(Bin64)\SharpDX.D3DCompiler.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

@@ -1,4 +1,19 @@
-# Space Engineers Client Plugin Template
+# Final Frontier
+
+Client-side celestial rendering for Space Engineers through Anomaly. The current implementation draws 41,394 Hipparcos stars and an analytic sun disc, with a matching star background in reflection probes. Limiting magnitude (default 6.5), brightness and approximate star colour strength adjust live. Optional constellation highlight rings, stick-figure lines and fantasy star boosts default on for the main view and stay out of probes. See [catalogue details and data licensing](Docs/Catalogue.md).
+
+Settings are available in Pulsar and under **Anomaly Shaders → Final Frontier → Settings** when Rich HUD Master is present. Disable the provider to restore the world sky. Gameplay sunlight is unchanged; the vanilla sun flare remains during this phase. MSAA uses vanilla fallback.
+
+See [the implementation plan](Docs/EnvironmentRenderingPlan.md), [current validation and next steps](Docs/IntegrationSpike.md), and [the repeatable D3D11 smoke test](Tests/Run-CelestialSmokeTests.ps1). The initial sky/sun replacement, zoom and day/night tracking have been validated in-game. The new catalogue needs its own visual/performance pass; the FG-related orange sun ring and motion brightening were confirmed fixed.
+
+The opt-in **Anomaly Shaders → Final Frontier → Atmosphere** page adds shared atmospheric
+fog/cloud rendering through Anomaly, with Clear, Dramatic and Heavy Fantasy presets.
+Restart the normal Pulsar source launch to pick up changes. Enable Atmosphere in a planet
+atmosphere; it defaults off pending acceptance. Native/FSR/DLSS/FG scene testing and the
+GTX 1070 Ti performance target remain unverified. See Anomaly's `Docs/SharedVolumetrics.md`
+for the acceptance checklist and timing-log collection. Existing star/sun controls remain separate.
+
+The remaining template documentation describes the inherited build and loader setup.
 
 [Server/Client version of the template](https://github.com/viktor-ferenczi/se-server-plugin-template)
 
@@ -14,13 +29,14 @@
 
 1. Click on **Use this template** (top right corner on GitHub) and follow the wizard to create your repository
 2. Clone your repository to have a local working copy
-3. Run `setup.py`, enter the name of your plugin project in `CapitalizedWords` format
-4. Let `setup.py` auto-detect your install location or fill it in manually
-5. Open the solution in Visual Studio or Rider
-6. Make a test build, the plugin's DLL should be deployed (see the build log for the path)
-7. Test that the empty plugin can be enabled in Pulsar
-8. Replace the contents of this file with the description of your plugin
-9. Follow the TODO comments in the source code and implement your plugin
+3. Run `setup.py` from the repo folder (double-click is fine; it always uses its own directory, not the process CWD)
+4. Enter the name of your plugin project in `CapitalizedWords` format (C# identifier, e.g. `MyCoolPlugin`)
+5. Let `setup.py` auto-detect your install location or fill it in manually
+6. Open the solution in Visual Studio or Rider
+7. Make a test build, the plugin's DLL should be deployed (see the build log for the path)
+8. Test that the empty plugin can be enabled in Pulsar
+9. Replace the contents of this file with the description of your plugin
+10. Follow the TODO comments in the source code and implement your plugin
 
 In case of questions please feel free to ask the SE plugin developer community on the
 [Pulsar](https://discord.gg/z8ZczP2YZY) Discord server in their relevant text channels. 
@@ -53,14 +69,27 @@ To override a path manually, copy the first `PropertyGroup` of `Directory.Build.
 paths. `setup.py` writes that file for you with the auto-detected install location, creating
 it if needed and keeping any other overrides already in it.
 
-Leaving a path empty (or having no `Directory.Build.props.user` at all) falls back to the
-auto-detection in `Directory.Build.props`, which reads the Steam registry keys on Windows and
-the usual Steam locations on Linux, then resolves the game through Steam's `libraryfolders.vdf`,
-so installs on a secondary Steam library are found as well. Pulsar defaults to `%AppData%\Pulsar`
-on Windows and `$XDG_CONFIG_HOME/Pulsar` (or `~/.config/Pulsar`) on Linux.
+Leaving a path empty (or having no `Directory.Build.props.user` at all) falls back to
+auto-detection in `Directory.Build.props`:
+
+- **Bin64** — Steam App 244850 `InstallLocation` on Windows, then Steam's
+  `libraryfolders.vdf` (secondary libraries), then the default Steam library path.
+  On Linux it walks the usual Steam / Flatpak locations.
+- **Pulsar** — next to the game (`<GameRoot>/Pulsar/Legacy.exe`, the Pulsar-Installer
+  layout) first, then `%AppData%\Pulsar` on Windows or `$XDG_CONFIG_HOME/Pulsar`
+  (or `~/.config/Pulsar`) on Linux. A path is used only when that install actually exists.
+
+`setup.py` writes the same paths into `Directory.Build.props.user`. It reads Steam from
+`HKCU\SOFTWARE\Valve\Steam` first (then the WOW6432Node / HKLM keys), parses
+`libraryfolders.vdf` without crashing on a partial file, and prompts for a manual folder
+if auto-detect fails.
 
 The build fails with a clear message if `Bin64` cannot be resolved, and warns instead of failing
 if the Pulsar folder is missing.
+
+On Windows, Visual Studio 17 / ReSharper Build Tools MSBuild can host `net48` only.
+`dotnet build` still builds both `net48` and `net10.0`. The project disables the .NET
+workload resolver so those older MSBuild hosts do not fail looking up .NET 10 workloads.
 
 ### Deployment
 
