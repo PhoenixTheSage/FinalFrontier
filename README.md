@@ -1,6 +1,6 @@
 # Final Frontier
 
-Client-side celestial rendering for Space Engineers through Anomaly. The current implementation draws 41,394 Hipparcos stars and an analytic sun disc, with a matching star background in reflection probes. Limiting magnitude (default 6.5), brightness and approximate star colour strength adjust live. Optional constellation highlight rings, stick-figure lines and fantasy star boosts default on for the main view and stay out of probes. See [catalogue details and data licensing](Docs/Catalogue.md).
+Client-side celestial rendering for Space Engineers through Anomaly. The current implementation draws 41,394 Hipparcos stars and an analytic sun disc, with a matching star background in reflection probes. Limiting magnitude (default 6.5), brightness and approximate star colour strength adjust live. Optional constellation highlight rings and stick-figure lines follow IAU / Alan MacRobert patterns; fantasy star boosts, look-at name headers and colored fantasy art overlays default on for the main view and stay out of probes. See [catalogue details and data licensing](Docs/Catalogue.md).
 
 Settings are available in Pulsar and under **Anomaly Shaders → Final Frontier → Settings** when Rich HUD Master is present. Disable the provider to restore the world sky. Gameplay sunlight is unchanged; the vanilla sun flare remains during this phase. MSAA uses vanilla fallback.
 

@@ -41,7 +41,7 @@ float3 CatalogueStars(AnomalyCelestialInput input)
     float power = CelestialUniform[1].w > 0.5 ? clamp(CelestialUniform[1].w, 1, 8) : 1;
     float twinkleAmt = input.isProbe ? 0 : max(CelestialUniform[2].x, 0);
     float twinkleSpeed = max(CelestialUniform[2].y, 0);
-    float fantasy = (!input.isProbe && CelestialUniform[2].w > 0.5) ? 1 : 0;
+    float fantasy = (!input.isProbe && CelestialUniform[2].w > 0.5) ? ConstellationSkyVisibility() : 0;
     float3 dx = input.directionDx / footprint, dy = input.directionDy / footprint;
     float xx = dot(dx,dx), xy = dot(dx,dy), yy = dot(dy,dy);
     float determinant = max(xx*yy-xy*xy, 1e-8);

@@ -1,60 +1,583 @@
 {
-  "credit": "Curated stick figures for recognition; IAU does not prescribe official figures. Positions from ESA Hipparcos (CC BY-NC 3.0 IGO).",
+  "credit": "Stick figures: IAU / Alan MacRobert patterns via dcf21/constellation-stick-figures (constellation_lines_iau.dat). Star positions: ESA Hipparcos (CC BY-NC 3.0 IGO).",
   "figures": [
     {
       "name": "Orion",
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy).",
       "edges": [
-        [26207, 27989], [26207, 25336],
-        [27989, 25930], [25336, 25930],
-        [25930, 26311], [26311, 26727],
-        [25930, 24436], [26727, 27366],
-        [24436, 27366]
+        [
+          22449,
+          22509
+        ],
+        [
+          22449,
+          22549
+        ],
+        [
+          22449,
+          25336
+        ],
+        [
+          22509,
+          22845
+        ],
+        [
+          22549,
+          22797
+        ],
+        [
+          22797,
+          23123
+        ],
+        [
+          22845,
+          22957
+        ],
+        [
+          22957,
+          23607
+        ],
+        [
+          24436,
+          25281
+        ],
+        [
+          25281,
+          25930
+        ],
+        [
+          25336,
+          25930
+        ],
+        [
+          25336,
+          26207
+        ],
+        [
+          25336,
+          27989
+        ],
+        [
+          25930,
+          26311
+        ],
+        [
+          26207,
+          27989
+        ],
+        [
+          26311,
+          26727
+        ],
+        [
+          26727,
+          27366
+        ],
+        [
+          26727,
+          27989
+        ],
+        [
+          27913,
+          28716
+        ],
+        [
+          27913,
+          29038
+        ],
+        [
+          27989,
+          28614
+        ],
+        [
+          28614,
+          29038
+        ],
+        [
+          28716,
+          29426
+        ],
+        [
+          29038,
+          29426
+        ]
       ]
     },
     {
       "name": "Ursa Major",
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy). Dropped 1 edge(s) whose HIP lacks ICRS in the V<=8 catalogue snapshot.",
       "edges": [
-        [54061, 53910], [53910, 58001], [58001, 59774], [59774, 54061],
-        [59774, 62956], [62956, 65378], [65378, 67301]
+        [
+          41704,
+          46733
+        ],
+        [
+          41704,
+          48319
+        ],
+        [
+          44127,
+          44471
+        ],
+        [
+          44127,
+          46853
+        ],
+        [
+          46733,
+          48319
+        ],
+        [
+          46733,
+          54061
+        ],
+        [
+          46853,
+          48319
+        ],
+        [
+          48319,
+          53910
+        ],
+        [
+          50372,
+          50801
+        ],
+        [
+          50801,
+          54539
+        ],
+        [
+          53910,
+          54061
+        ],
+        [
+          53910,
+          58001
+        ],
+        [
+          54061,
+          59774
+        ],
+        [
+          54539,
+          57399
+        ],
+        [
+          55219,
+          57399
+        ],
+        [
+          57399,
+          58001
+        ],
+        [
+          58001,
+          59774
+        ],
+        [
+          59774,
+          62956
+        ],
+        [
+          62956,
+          65378
+        ],
+        [
+          65378,
+          67301
+        ]
       ]
     },
     {
       "name": "Cassiopeia",
-      "edges": [[746, 3179], [3179, 4427], [4427, 6686], [6686, 8886]]
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy).",
+      "edges": [
+        [
+          746,
+          3179
+        ],
+        [
+          3179,
+          4427
+        ],
+        [
+          4427,
+          6686
+        ],
+        [
+          6686,
+          8886
+        ]
+      ]
     },
     {
       "name": "Cygnus",
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy).",
       "edges": [
-        [102098, 100453], [100453, 95947],
-        [102488, 100453], [100453, 97165]
+        [
+          94779,
+          95853
+        ],
+        [
+          95853,
+          97165
+        ],
+        [
+          95853,
+          99848
+        ],
+        [
+          95947,
+          96683
+        ],
+        [
+          96683,
+          98110
+        ],
+        [
+          97165,
+          100453
+        ],
+        [
+          98110,
+          100453
+        ],
+        [
+          99848,
+          102098
+        ],
+        [
+          100453,
+          102098
+        ],
+        [
+          100453,
+          102488
+        ],
+        [
+          102098,
+          103413
+        ],
+        [
+          102488,
+          104732
+        ],
+        [
+          103413,
+          104732
+        ]
       ]
     },
     {
       "name": "Crux",
-      "edges": [[60718, 61084], [62434, 59747]]
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy).",
+      "edges": [
+        [
+          59747,
+          62434
+        ],
+        [
+          60718,
+          61084
+        ]
+      ]
     },
     {
       "name": "Leo",
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy).",
       "edges": [
-        [49669, 50583], [50583, 54872], [54872, 57632],
-        [49669, 50335], [50335, 48455], [48455, 50583]
+        [
+          46146,
+          46750
+        ],
+        [
+          46146,
+          48455
+        ],
+        [
+          46750,
+          47908
+        ],
+        [
+          47908,
+          48455
+        ],
+        [
+          47908,
+          49583
+        ],
+        [
+          48455,
+          50335
+        ],
+        [
+          49583,
+          49669
+        ],
+        [
+          49583,
+          50583
+        ],
+        [
+          49583,
+          54879
+        ],
+        [
+          50335,
+          50583
+        ],
+        [
+          50583,
+          53954
+        ],
+        [
+          53954,
+          54872
+        ],
+        [
+          54872,
+          54879
+        ],
+        [
+          54872,
+          57632
+        ],
+        [
+          54879,
+          55642
+        ],
+        [
+          54879,
+          57632
+        ],
+        [
+          55434,
+          55642
+        ]
       ]
     },
     {
       "name": "Taurus",
-      "edges": [[21421, 20889], [21421, 14135], [21421, 25428], [20889, 18532]]
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy).",
+      "edges": [
+        [
+          15900,
+          16852
+        ],
+        [
+          16083,
+          18724
+        ],
+        [
+          16083,
+          18907
+        ],
+        [
+          18724,
+          20205
+        ],
+        [
+          20205,
+          20455
+        ],
+        [
+          20205,
+          20894
+        ],
+        [
+          20455,
+          20889
+        ],
+        [
+          20889,
+          21881
+        ],
+        [
+          20894,
+          21421
+        ],
+        [
+          21421,
+          26451
+        ],
+        [
+          21881,
+          25428
+        ]
+      ]
     },
     {
       "name": "Scorpius",
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy).",
       "edges": [
-        [78820, 78401], [78401, 81266], [81266, 80763],
-        [80763, 82273], [82273, 82396], [82396, 82514],
-        [82514, 82671], [82671, 84143], [84143, 86228], [86228, 85927]
+        [
+          78104,
+          78265
+        ],
+        [
+          78265,
+          78401
+        ],
+        [
+          78401,
+          78820
+        ],
+        [
+          78401,
+          80112
+        ],
+        [
+          78820,
+          79374
+        ],
+        [
+          80112,
+          80763
+        ],
+        [
+          80763,
+          81266
+        ],
+        [
+          81266,
+          82396
+        ],
+        [
+          82396,
+          82514
+        ],
+        [
+          82514,
+          82729
+        ],
+        [
+          82729,
+          84143
+        ],
+        [
+          84143,
+          86228
+        ],
+        [
+          85696,
+          85927
+        ],
+        [
+          85696,
+          86670
+        ],
+        [
+          85927,
+          87261
+        ],
+        [
+          86228,
+          87073
+        ],
+        [
+          86670,
+          87073
+        ]
       ]
     },
     {
       "name": "Centaurus",
-      "edges": [[71683, 68702], [68702, 71860], [71683, 71860]]
+      "notes": "IAU / Alan MacRobert stick figure (constellation_lines_iau; same patterns as IAU public charts and traditional Western atlas figures such as go-astronomy).",
+      "edges": [
+        [
+          56250,
+          59449
+        ],
+        [
+          56480,
+          59196
+        ],
+        [
+          59196,
+          60823
+        ],
+        [
+          59449,
+          60823
+        ],
+        [
+          60823,
+          61932
+        ],
+        [
+          61789,
+          65109
+        ],
+        [
+          61932,
+          66657
+        ],
+        [
+          61932,
+          68002
+        ],
+        [
+          65109,
+          65936
+        ],
+        [
+          65936,
+          67464
+        ],
+        [
+          66657,
+          68002
+        ],
+        [
+          66657,
+          68702
+        ],
+        [
+          67464,
+          67472
+        ],
+        [
+          67464,
+          68933
+        ],
+        [
+          67472,
+          68002
+        ],
+        [
+          68002,
+          68282
+        ],
+        [
+          68245,
+          68282
+        ],
+        [
+          68245,
+          68862
+        ],
+        [
+          68245,
+          71352
+        ],
+        [
+          68702,
+          71683
+        ],
+        [
+          68862,
+          70090
+        ],
+        [
+          68933,
+          70090
+        ],
+        [
+          71352,
+          73334
+        ]
+      ]
     }
   ]
 }

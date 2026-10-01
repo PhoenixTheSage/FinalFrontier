@@ -171,6 +171,11 @@ static class CelestialSmokeTests
                 uniforms[13] = guide.EdgeCount;
                 uniforms[14] = guide.MemberCount;
                 uniforms[15] = guideStart + guide.MemberStart;
+                uniforms[16] = guideStart + guide.FigureStart;
+                uniforms[17] = guide.FigureCount;
+                uniforms[18] = 0;
+                uniforms[19] = 0;
+                Check("constellation v2 figures loaded", guide.Format >= 4 && guide.FigureCount == 9);
                 int member = (guideStart + guide.MemberStart) * 4;
                 forward = Vector3.Normalize(new Vector3(star[member], star[member + 1], star[member + 2]));
                 right = Vector3.Normalize(Vector3.Cross(forward, Math.Abs(forward.Y) > 0.9f ? Vector3.UnitX : Vector3.UnitY));
@@ -193,6 +198,16 @@ static class CelestialSmokeTests
                 var linedMain = Draw(main);
                 Check("constellation lines add main-view guide radiance", BaseFlux(linedMain) > BaseFlux(plainMain) * 1.01);
                 Check("constellation lines stay out of probes", Math.Abs(Center(Draw(probe)) - plainProbe) < 1e-4f);
+                uniforms[22] = 1; // Delayed Pattern on
+                uniforms[33] = 0; // anyPatternLive off → whole lines block skipped
+                var delayedHidden = Draw(main);
+                Check("delayed pattern hides lines until look-at fade", BaseFlux(delayedHidden) <= BaseFlux(plainMain) * 1.002);
+                uniforms[22] = 0;
+                uniforms[33] = 0;
+                uniforms[20] = 1; // daylight-under-atmosphere occlusion
+                var dayOccluded = Draw(main);
+                Check("constellation overlays hide under daylight atmosphere", BaseFlux(dayOccluded) <= BaseFlux(plainMain) * 1.002);
+                uniforms[20] = 0;
                 // Fantasy uses catalogue membership stamps; exercise it on the default main -Z star.
                 var fantasyStar = MakeStar(0, 0, -1);
                 fantasyStar[32769 * 4 + 7] = 2.5f + 100f;
@@ -209,6 +224,50 @@ static class CelestialSmokeTests
                 uniforms[11] = 0;
                 var probePlain = Center(Draw(probe));
                 Check("constellation fantasy stays out of probes", Math.Abs(probeFantasy - probePlain) < 1e-4f && Math.Abs(probePlain - unboosted) < 1e-3f);
+                // Look-at names/art: aim at first figure center with a wide FOV so glyphs/strokes hit pixels.
+                var nameStar = MakeStar(0, 0, -1);
+                guideStart = nameStar.Length / 4;
+                star = ClientPlugin.Celestial.ConstellationGuide.Concatenate(nameStar, guide);
+                uniforms[12] = guideStart;
+                uniforms[15] = guideStart + guide.MemberStart;
+                uniforms[16] = guideStart + guide.FigureStart;
+                uniforms[17] = guide.FigureCount;
+                int fig = (guideStart + guide.FigureStart) * 4;
+                forward = Vector3.Normalize(new Vector3(star[fig], star[fig + 1], star[fig + 2]));
+                right = Vector3.Normalize(Vector3.Cross(forward, Math.Abs(forward.Y) > 0.9f ? Vector3.UnitX : Vector3.UnitY));
+                up = Vector3.Cross(right, forward);
+                Write("Environment.inv_view_matrix", new float[] {
+                    right.X, right.Y, right.Z, 0,
+                    up.X, up.Y, up.Z, 0,
+                    -forward.X, -forward.Y, -forward.Z, 0,
+                    0, 0, 0, 1
+                });
+                projection[0] = projection[5] = 1.2f;
+                Write("Environment.projection_matrix", projection);
+                uniforms[10] = 0; uniforms[11] = 0; uniforms[18] = 0; uniforms[19] = 0;
+                foreground = false;
+                var focusPlain = BaseFlux(Draw(main));
+                uniforms[18] = 1;
+                var named = BaseFlux(Draw(main));
+                Check("constellation names add look-at header radiance", named > focusPlain * 1.001);
+                uniforms[18] = 0; uniforms[19] = 1;
+                var arted = BaseFlux(Draw(main));
+                Check("constellation art adds look-at fantasy radiance", arted > focusPlain * 1.001);
+                uniforms[18] = 1; uniforms[19] = 1;
+                var namedProbe = Center(Draw(probe));
+                uniforms[18] = 0; uniforms[19] = 0;
+                var clearProbe = Center(Draw(probe));
+                Check("constellation names and art stay out of probes", Math.Abs(namedProbe - clearProbe) < 1e-4f);
+                // Looking away should drop overlay contribution even if scene flux differs.
+                uniforms[18] = 1; uniforms[19] = 1;
+                double overlayOn = BaseFlux(Draw(main)) - focusPlain;
+                Write("Environment.inv_view_matrix", new float[] { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 });
+                uniforms[18] = 0; uniforms[19] = 0;
+                double awayPlain = BaseFlux(Draw(main));
+                uniforms[18] = 1; uniforms[19] = 1;
+                double awayOverlay = BaseFlux(Draw(main)) - awayPlain;
+                Check("constellation names/art fade when looking away", overlayOn > 0 && awayOverlay < overlayOn * 0.15);
+                foreground = true;
                 Console.WriteLine("PASS: " + checks + " D3D11 WARP checks");
             }
             return 0;
@@ -236,9 +295,67 @@ static class CelestialSmokeTests
         foreach (var part in path.Split('.')) { type = type.GetMemberType(part); offset += type.Description.Offset; }
         Array.Copy(values, 0, frame, offset / 4, values.Length);
     }
+    static Texture2D artTexture;
+    static ShaderResourceView artSrv;
+    static SamplerState artSampler;
+    static int artSlices;
+
+    static void EnsureArt(int slices = 1)
+    {
+        slices = Math.Max(1, slices);
+        if (artSrv != null && artSlices >= slices) return;
+        artSrv?.Dispose();
+        artTexture?.Dispose();
+        artSampler?.Dispose();
+        artSrv = null; artTexture = null; artSampler = null;
+        const int n = 16;
+        var pixels = new byte[n * n * 4 * slices];
+        for (int s = 0; s < slices; s++)
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++)
+                {
+                    int o = ((s * n * n) + y * n + x) * 4;
+                    float u = (x + 0.5f) / n * 2 - 1, v = (y + 0.5f) / n * 2 - 1;
+                    bool on = u * u + v * v < 0.35f;
+                    pixels[o] = on ? (byte)40 : (byte)0;
+                    pixels[o + 1] = on ? (byte)220 : (byte)0;
+                    pixels[o + 2] = on ? (byte)120 : (byte)0;
+                    pixels[o + 3] = on ? (byte)230 : (byte)0;
+                }
+        var handle = System.Runtime.InteropServices.GCHandle.Alloc(pixels, System.Runtime.InteropServices.GCHandleType.Pinned);
+        try
+        {
+            var boxes = new DataBox[slices];
+            for (int s = 0; s < slices; s++)
+                boxes[s] = new DataBox(IntPtr.Add(handle.AddrOfPinnedObject(), s * n * n * 4), n * 4, 0);
+            artTexture = new Texture2D(device, new Texture2DDescription
+            {
+                Width = n, Height = n, MipLevels = 1, ArraySize = slices,
+                Format = Format.R8G8B8A8_UNorm, SampleDescription = new SampleDescription(1, 0),
+                Usage = ResourceUsage.Immutable, BindFlags = BindFlags.ShaderResource
+            }, boxes);
+            artSrv = new ShaderResourceView(device, artTexture, new ShaderResourceViewDescription
+            {
+                Format = Format.R8G8B8A8_UNorm,
+                Dimension = ShaderResourceViewDimension.Texture2DArray,
+                Texture2DArray = { MipLevels = 1, FirstArraySlice = 0, ArraySize = slices, MostDetailedMip = 0 }
+            });
+            artSampler = new SamplerState(device, new SamplerStateDescription
+            {
+                Filter = Filter.MinMagMipLinear,
+                AddressU = TextureAddressMode.Clamp,
+                AddressV = TextureAddressMode.Clamp,
+                AddressW = TextureAddressMode.Clamp
+            });
+            artSlices = slices;
+        }
+        finally { handle.Free(); }
+    }
+
     static float[] Draw(PixelShader shader)
     {
         view[16] = star.Length / 4;
+        EnsureArt(Math.Max(1, (int)uniforms[17]));
         var desc = new Texture2DDescription { Width = Size, Height = Size, MipLevels = 1, ArraySize = 1,
             Format = Format.R32G32B32A32_Float, SampleDescription = new SampleDescription(1, 0),
             Usage = ResourceUsage.Default, BindFlags = BindFlags.RenderTarget };
@@ -267,8 +384,13 @@ static class CelestialSmokeTests
                     context.PixelShader.SetConstantBuffer(7, uniformBuffer);
                     context.PixelShader.SetShaderResource(0, depthSrv);
                     context.PixelShader.SetShaderResource(1, starSrv);
+                    context.PixelShader.SetShaderResource(2, artSrv);
+                    context.PixelShader.SetSampler(0, artSampler);
                     context.Draw(3, 0);
-                    context.PixelShader.SetShaderResource(0, null); context.PixelShader.SetShaderResource(1, null);
+                    context.PixelShader.SetShaderResource(0, null);
+                    context.PixelShader.SetShaderResource(1, null);
+                    context.PixelShader.SetShaderResource(2, null);
+                    context.PixelShader.SetSampler(0, null);
                     context.OutputMerger.SetRenderTargets((RenderTargetView)null);
                     var stagingDesc = desc; stagingDesc.BindFlags = BindFlags.None;
                     stagingDesc.Usage = ResourceUsage.Staging; stagingDesc.CpuAccessFlags = CpuAccessFlags.Read;

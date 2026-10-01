@@ -16,12 +16,19 @@ The data and source snapshot carry the separate ESA CC BY-NC 3.0 IGO terms in
 
 Coordinates are fixed ICRS at epoch J1991.25, mapped to +X at RA 0, +Y celestial
 north, +Z at RA 90. There is no proper-motion or distance/parallax simulation.
-The catalogue supplies Earth constellation geometry. Curated stick figures
-(Orion, Ursa Major, Cassiopeia, Cygnus, Crux, Leo, Taurus, Scorpius, Centaurus)
-bake to `Constellations.bin` via `python Tools/Catalogue/build_constellations.py`.
-Main-view guides draw highlight rings and connecting lines; fantasy mode brightens
-member stars with a softer glow. Both default on and are excluded from probes.
-Projected labels remain later work. The colour conversion is an artistic tint, not calibrated RGB.
+The catalogue supplies Earth constellation geometry. Stick figures follow the
+IAU / Alan MacRobert line patterns (same traditional Western figures used on
+public IAU charts and educational atlases such as go-astronomy), baked from
+`constellation_lines_iau.dat` via `python Tools/Catalogue/import_iau_figures.py`
+then `python Tools/Catalogue/build_constellations.py`. HIP endpoints absent from
+the V≤8 catalogue snapshot drop that edge only. Main-view guides draw highlight
+rings and connecting lines with a soft per-segment pulse; fantasy mode brightens
+member stars with a softer glow. Optional look-at name headers (semi-transparent
+bitmap glyphs) and
+colored fantasy art (`Assets/Celestial/Art`, RGBA8 slices via Anomaly
+`SetArt`) fade in when the view aims at a figure and out when looking away.
+Lines, fantasy, names and art all default on and are excluded from probes.
+The colour conversion is an artistic tint, not calibrated RGB.
 
 Binary format: little-endian `FFSC`, uint32 version 1, uint32 float4-record count,
 then float4 records. Record 0 is (32, star count, 2, 1). The next 32 cubed records
@@ -37,9 +44,10 @@ truncation or RA/pole seam. It integrates a triangular profile over each pixel
 using Anomaly's pre-discard direction derivatives. Magnitude controls relative
 flux. The display normalization is artistic; high-zoom stars stay unresolved.
 
-Validation: 18 D3D11 WARP checks execute both real shader variants, including
-subpixel flux conservation across a cell boundary, magnitude filtering and
-projection of the brightest real star. The independent Python suite checks
+Validation: D3D11 WARP checks execute both real shader variants, including
+subpixel flux conservation across a cell boundary, magnitude filtering,
+projection of the brightest real star, constellation lines/fantasy, and
+look-at name/art fade. The independent Python suite checks
 Sirius coordinates, Orion separation and spatial-query completeness against
 brute-force distances. Run `python Tools/Catalogue/test_catalogue.py` and
 `pwsh -File Tests/Run-CelestialSmokeTests.ps1`.

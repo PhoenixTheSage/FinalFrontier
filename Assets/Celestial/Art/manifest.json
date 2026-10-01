@@ -1,0 +1,63 @@
+{
+  "resolution": 512,
+  "format": "rgba8",
+  "figures": [
+    "Orion",
+    "Ursa Major",
+    "Cassiopeia",
+    "Cygnus",
+    "Crux",
+    "Leo",
+    "Taurus",
+    "Scorpius",
+    "Centaurus"
+  ],
+  "files": {
+    "Orion": {
+      "png": "Orion.png",
+      "rgba": "Orion.rgba",
+      "sha256": "1845285e98e4b8ad221fcecc561ff8209fa9bb37de10e994d83287d85d0db76f"
+    },
+    "Ursa_Major": {
+      "png": "Ursa_Major.png",
+      "rgba": "Ursa_Major.rgba",
+      "sha256": "8bd5ad556f08779e97bedc5c1f6ee9995a5257bc51ec9d03a392f83fe65bd667"
+    },
+    "Cassiopeia": {
+      "png": "Cassiopeia.png",
+      "rgba": "Cassiopeia.rgba",
+      "sha256": "68d54ae70ef5afc5d6751edc8b8280c606d3c2bd2ce52b63f6bcc92f31c9de17"
+    },
+    "Cygnus": {
+      "png": "Cygnus.png",
+      "rgba": "Cygnus.rgba",
+      "sha256": "427cf83d060d25c99d21a247d30c0eedfe2c707a84e7a7ee30186564a0ea0942"
+    },
+    "Crux": {
+      "png": "Crux.png",
+      "rgba": "Crux.rgba",
+      "sha256": "e94594575a4110481ee9385069296c3704a518eb3f0255207cd1341f3f4280e1"
+    },
+    "Leo": {
+      "png": "Leo.png",
+      "rgba": "Leo.rgba",
+      "sha256": "dd5c0a12ed092a0e46d53643bfa4f1ce32d2e01029545e5b48b03f149360896c"
+    },
+    "Taurus": {
+      "png": "Taurus.png",
+      "rgba": "Taurus.rgba",
+      "sha256": "5bf7d255c85914bcd1105362623800aa4490932a802c4161ee421e7e2bc2e914"
+    },
+    "Scorpius": {
+      "png": "Scorpius.png",
+      "rgba": "Scorpius.rgba",
+      "sha256": "0daaa0f31f43d5539068f3226016c7c377c6dfdce23c54e8219294939bb6e864"
+    },
+    "Centaurus": {
+      "png": "Centaurus.png",
+      "rgba": "Centaurus.rgba",
+      "sha256": "0bbc9385930537cd102af1a6ae7d166e2555dbfb2c11013481ead7d03365a955"
+    }
+  },
+  "style": "glowing embroidery fantasy outlines on transparent; sample with flipped figure right"
+}

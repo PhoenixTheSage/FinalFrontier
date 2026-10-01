@@ -13,7 +13,7 @@ internal static class AtmosphereBridge
 {
     const string Id="FinalFrontier.Atmosphere";
     static Type host,terminal;
-    static object page;
+    static object page,statusPage;
     static string shader;
     static bool registered;
     static int nextRefresh;
@@ -30,6 +30,7 @@ internal static class AtmosphereBridge
             if(!registered) registered=(bool)AnomalyBridge.Call(host,"Register",Id,shader,Array.Empty<string>());
             if(!registered) { Status="Atmosphere provider registration failed"; return; }
             if(page==null) CreatePage();
+            if(statusPage==null) CreateStatusPage();
             var config=Config.Current;
             MyPlanet planet=null;
             double best=double.MaxValue;
@@ -60,18 +61,23 @@ internal static class AtmosphereBridge
                 AnomalyBridge.Call(host,"Configure",(int)config.AtmosphereQuality,config.FogDistance,(int)config.AtmosphereDebugView);
             }
             Status=!config.AtmosphereEnabled?"Disabled (acceptance build)":!active?"Outside an eligible atmosphere":(string)host.GetProperty("StatusLine").GetValue(null);
-            if(page!=null && (nextRefresh==0 || unchecked(Environment.TickCount-nextRefresh)>=0)) { Page("Refresh");nextRefresh=unchecked(Environment.TickCount+1000); }
+            if((page!=null || statusPage!=null) && (nextRefresh==0 || unchecked(Environment.TickCount-nextRefresh)>=0))
+            {
+                if(page!=null) Page(page,"Refresh");
+                if(statusPage!=null) Page(statusPage,"Refresh");
+                nextRefresh=unchecked(Environment.TickCount+1000);
+            }
         }
         catch(Exception e) { Status="Atmosphere: "+(e.InnerException??e).Message; }
     }
-    static object Page(string method,params object[] args)
+    static object Page(object target,string method,params object[] args)
     {
-        foreach(var candidate in page.GetType().GetInterface("ClientPlugin.RichHud.ITerminalConfigPage").GetMethods())
-            if(candidate.Name==method && !candidate.IsGenericMethod && candidate.GetParameters().Length==args.Length) return candidate.Invoke(page,args);
+        foreach(var candidate in target.GetType().GetInterface("ClientPlugin.RichHud.ITerminalConfigPage").GetMethods())
+            if(candidate.Name==method && !candidate.IsGenericMethod && candidate.GetParameters().Length==args.Length) return candidate.Invoke(target,args);
         throw new MissingMethodException(method);
     }
     static void Slider(string label,float min,float max,Func<float> get,Action<float> set,string description)
-        =>Page("Slider",label,min,max,get,set,description);
+        =>Page(page,"Slider",label,min,max,get,set,description);
     static void CreatePage()
     {
         terminal ??= AnomalyBridge.Find("ClientPlugin.RichHud.TerminalConfigRegistry");
@@ -79,10 +85,10 @@ internal static class AtmosphereBridge
         page=AnomalyBridge.Call(terminal,"RequestFolderPage","Final Frontier","Atmosphere");
         if(page==null) return;
         var c=Config.Current;
-        Page("Category","Atmospheric fog and godrays");
-        Page("Checkbox","Enabled",(Func<bool>)(()=>c.AtmosphereEnabled),(Action<bool>)(v=>c.AtmosphereEnabled=v),"Opt-in acceptance build. Adds fog while retaining the world's atmosphere.");
-        Page("Dropdown","Look",typeof(AtmosphereStyle),(Func<object>)(()=>c.AtmospherePreset),(Action<object>)(v=>c.ApplyAtmospherePreset((AtmosphereStyle)v)),"Clear, Dramatic, or Heavy Fantasy.");
-        Page("Dropdown","Quality",typeof(AtmosphereQuality),(Func<object>)(()=>c.AtmosphereQuality),(Action<object>)(v=>c.AtmosphereQuality=(AtmosphereQuality)v),"Changes volume sampling; geometry shadow accuracy is retained.");
+        Page(page,"Category","Atmospheric fog and godrays");
+        Page(page,"Checkbox","Enabled",(Func<bool>)(()=>c.AtmosphereEnabled),(Action<bool>)(v=>c.AtmosphereEnabled=v),"Opt-in acceptance build. Adds fog while retaining the world's atmosphere.");
+        Page(page,"Dropdown","Look",typeof(AtmosphereStyle),(Func<object>)(()=>c.AtmospherePreset),(Action<object>)(v=>c.ApplyAtmospherePreset((AtmosphereStyle)v)),"Clear, Dramatic, or Heavy Fantasy.");
+        Page(page,"Dropdown","Quality",typeof(AtmosphereQuality),(Func<object>)(()=>c.AtmosphereQuality),(Action<object>)(v=>c.AtmosphereQuality=(AtmosphereQuality)v),"Changes volume sampling; geometry shadow accuracy is retained.");
         Slider("Density",0,2,()=>c.FogDensity*1000,v=>c.FogDensity=v/1000,"Extinction per kilometre. Zero permits shared Clouds-only testing.");
         Slider("Height falloff (m)",20,3000,()=>c.FogHeight,v=>c.FogHeight=v,"Height over the planet reference surface.");
         Slider("Base height (m)",-3000,3000,()=>c.FogBaseHeight,v=>c.FogBaseHeight=v,"Raises or lowers the haze layer.");
@@ -92,15 +98,32 @@ internal static class AtmosphereBridge
         Slider("Shaft contrast",.25f,1.5f,()=>c.FogShaftContrast,v=>c.FogShaftContrast=v,"Narrows the light-scattering lobe; blocked light stays blocked.");
         Slider("Wind (m/s)",0,100,()=>c.FogWind,v=>c.FogWind=v,"Fog drift speed.");
         Slider("Distance (m)",100,8000,()=>c.FogDistance,v=>c.FogDistance=v,"Shared near-volume distance; farther clouds retain their renderer.");
-        Page("Color","Tint",(Func<Color>)(()=>new Color(c.FogRed,c.FogGreen,c.FogBlue)),(Action<Color>)(v=>{var rgb=v.ToVector3();c.FogRed=rgb.X;c.FogGreen=rgb.Y;c.FogBlue=rgb.Z;}),"Scattering colour.");
-        Page("Category","Diagnostics");
-        Page("Dropdown","Debug view",typeof(AtmosphereDebug),(Func<object>)(()=>c.AtmosphereDebugView),(Action<object>)(v=>c.AtmosphereDebugView=(AtmosphereDebug)v),"Inspect density, blockers, cloud light, rooms, cascade coverage and rejected history.");
-        Page("Label","Status",(Func<string>)(()=>Status));
+        Page(page,"Color","Tint",(Func<Color>)(()=>new Color(c.FogRed,c.FogGreen,c.FogBlue)),(Action<Color>)(v=>{var rgb=v.ToVector3();c.FogRed=rgb.X;c.FogGreen=rgb.Y;c.FogBlue=rgb.Z;}),"Scattering colour.");
+        Page(page,"Category","Diagnostics");
+        Page(page,"Dropdown","Debug view",typeof(AtmosphereDebug),(Func<object>)(()=>c.AtmosphereDebugView),(Action<object>)(v=>c.AtmosphereDebugView=(AtmosphereDebug)v),"Inspect density, blockers, cloud light, rooms, cascade coverage and rejected history. Only after Shared volume active.");
+        Page(page,"Label","Status",(Func<string>)(()=>Status));
+        Page(page,"Button","Show Status",(Action)FinalFrontierStatus.Show,"Full celestial + volume StatusLine / shadow gates.");
+    }
+    static void CreateStatusPage()
+    {
+        terminal ??= AnomalyBridge.Find("ClientPlugin.RichHud.TerminalConfigRegistry");
+        if(terminal==null) return;
+        statusPage=AnomalyBridge.Call(terminal,"RequestFolderPage","Final Frontier","Status");
+        if(statusPage==null) return;
+        Page(statusPage,"Category","Live diagnostics");
+        Page(statusPage,"Label","Celestial",(Func<string>)(()=>AnomalyBridge.Status));
+        Page(statusPage,"Label","Atmosphere",(Func<string>)(()=>Status));
+        Page(statusPage,"Label","Dump",(Func<string>)(()=>FinalFrontierStatus.CurrentText));
+        Page(statusPage,"Button","Show Status window",(Action)FinalFrontierStatus.Show,"Opens a scrollable dump for copy/screenshot.");
     }
     internal static void Dispose()
     {
         if(host!=null) { AnomalyBridge.Call(host,"RequestRenderer",Id,false);if(registered) AnomalyBridge.Call(host,"Unregister",Id); }
-        if(terminal!=null) AnomalyBridge.Call(terminal,"UnregisterPage","Final Frontier/Atmosphere");
-        registered=false;page=null;host=terminal=null;
+        if(terminal!=null)
+        {
+            AnomalyBridge.Call(terminal,"UnregisterPage","Final Frontier/Atmosphere");
+            AnomalyBridge.Call(terminal,"UnregisterPage","Final Frontier/Status");
+        }
+        registered=false;page=statusPage=null;host=terminal=null;
     }
 }

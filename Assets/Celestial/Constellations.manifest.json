@@ -1,4 +1,5 @@
 {
+  "format": 4,
   "figures": [
     "Orion",
     "Ursa Major",
@@ -10,8 +11,12 @@
     "Scorpius",
     "Centaurus"
   ],
-  "edges": 49,
-  "members": 54,
-  "binary_sha256": "4a8bea35f936cb557eb5cd4ca9a28a8333511a66ff86bd1e304244b95b5856e5",
-  "credit": "Curated stick figures; star positions Credit: ESA Hipparcos"
+  "edges": 131,
+  "members": 128,
+  "figure_records": 9,
+  "figure_stride": 8,
+  "edge_stride": 3,
+  "strokes": 0,
+  "binary_sha256": "95022f6b8632c495737caec9fa9c2903d1228cb753b1fa63fd178825cbd75ae4",
+  "credit": "IAU/MacRobert stick figures via dcf21; fantasy art overlays are Texture2DArray slices; star positions Credit: ESA Hipparcos"
 }

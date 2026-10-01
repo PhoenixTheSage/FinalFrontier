@@ -23,6 +23,10 @@ public class Config : INotifyPropertyChanged
     float starCoreSharpness = 3f, starTwinkleStrength = 0.6f, starTwinkleSpeed = 1f;
     bool nativeSunGlare = true;
     bool constellationLines = true, constellationFantasy = true;
+    bool constellationNames = true, constellationArt = true;
+    bool constellationDelayedPattern = true;
+    float constellationPatternDelay = 1f;
+
 
     [Checkbox(description: "Replace the celestial background. Disabling restores the world sky and sun.")]
     public bool Enabled { get => enabled; set => Set(ref enabled, value); }
@@ -44,14 +48,25 @@ public class Config : INotifyPropertyChanged
     public bool ConstellationLines { get => constellationLines; set => Set(ref constellationLines, value); }
     [Checkbox(description: "Brighten constellation stars and give them a softer fantasy glow. Off in reflection probes.")]
     public bool ConstellationFantasy { get => constellationFantasy; set => Set(ref constellationFantasy, value); }
+    [Checkbox(description: "Show constellation name headers when looking at a figure. Fades in and out with view. Off in probes.")]
+    public bool ConstellationNames { get => constellationNames; set => Set(ref constellationNames, value); }
+    [Checkbox(description: "Overlay colored fantasy constellation artwork when looking at a figure. Fades with view. Off in probes.")]
+    public bool ConstellationArt { get => constellationArt; set => Set(ref constellationArt, value); }
+    [Checkbox(description: "When on, stick lines and rings stay hidden until you look at a figure (same zone as names), then fade in after a delay. When off, connections stay visible.")]
+    public bool ConstellationDelayedPattern { get => constellationDelayedPattern; set => Set(ref constellationDelayedPattern, value); }
+    [Slider(0, 5, 0.05f, SliderAttribute.SliderType.Float, description: "Seconds after look-at before stick lines and rings begin fading in. Names still appear immediately.")]
+    public float ConstellationPatternDelay { get => constellationPatternDelay; set => Set(ref constellationPatternDelay, Clamp(value, 0, 5, 1)); }
     [Checkbox(description: "Retain Keen's sun glare. Turn off to isolate the orange ring; other lights are unaffected.")]
     public bool NativeSunGlare { get => nativeSunGlare; set => Set(ref nativeSunGlare, value); }
     [Checkbox(description: "Draw the analytic sun disc. Gameplay sunlight is unchanged.")]
     public bool SunEnabled { get => sunEnabled; set => Set(ref sunEnabled, value); }
     [Slider(0, 5, 0.05f, SliderAttribute.SliderType.Float, description: "Visual disc brightness; does not change world lighting.")]
     public float SunBrightness { get => sunBrightness; set => Set(ref sunBrightness, Clamp(value, 0, 5, 1)); }
-    [Slider(0.02f, 2, 0.01f, SliderAttribute.SliderType.Float, description: "Sun angular radius in degrees.")]
+    [Slider(0.02f, 2, 0.005f, SliderAttribute.SliderType.Float, description: "Sun angular radius in degrees. Real sun ≈ 0.27°.")]
     public float SunRadiusDegrees { get => sunRadius; set => Set(ref sunRadius, Clamp(value, 0.02f, 2, 0.2666f)); }
+
+    [Button(label: "Show Status", description: "Celestial + Atmosphere + shared-volume StatusLine / shadow gates. Prefer this when fog or debug views do nothing.")]
+    public static void ShowStatus() => Integration.FinalFrontierStatus.Show();
 
     bool atmosphereEnabled;
     AtmosphereStyle atmospherePreset=AtmosphereStyle.Dramatic;
