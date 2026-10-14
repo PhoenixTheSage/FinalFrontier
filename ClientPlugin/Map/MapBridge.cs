@@ -76,7 +76,6 @@ internal sealed class MapBridge : IDisposable
             if (page == null) return;
             var config = Config.Current;
             Page("Category", "3D world map", "Client-known physical objects. Admin reveal is an explicit session-only tool.");
-            Page("Label", "Status", (Func<string>)(() => MapRuntime.Status));
             Page("Label", "Binding", (Func<string>)(() => config.MapToggle.ToString()));
             Page("Button", "Open map", (Action)MapRuntime.RequestOpen, "Open from gameplay after closing the terminal.");
             Page("Button", "Configure toggle key", (Action)MapRuntime.RequestSettings, "Use the Map toggle field in Pulsar settings; right-click to clear.");

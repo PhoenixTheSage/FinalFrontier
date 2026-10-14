@@ -92,13 +92,6 @@ internal static class StarDustBridge
             (Action<bool>)(v => c.StarDustNearPlanets = v), "Allow enhanced dust in natural gravity; use the world's planetary material and colour. Does not change Keen's global planet flag.");
         Page("Checkbox", "Hide inside large grids", (Func<bool>)(() => c.StarDustHideInsideGrids),
             (Action<bool>)(v => c.StarDustHideInsideGrids = v), "Retains Keen's camera-in-large-grid bounds test. Turning it off can show dust inside cockpits and rooms.");
-        Page("Category", "Live diagnostics");
-        Page("Label", "Status", (Func<string>)(() => StarDustRuntime.Status));
-        Page("Label", "Particles", (Func<string>)(() => StarDustRuntime.ActiveCount + " active / " + StarDustRuntime.PoolCapacity + " world capacity"));
-        Page("Label", "Submission", (Func<string>)(() => StarDustRuntime.SubmittedCount + " billboards submitted last draw / " + StarDustRuntime.DrawCalls + " draw calls"));
-        Page("Label", "Speed", (Func<string>)(() => StarDustRuntime.Speed.ToString("0.0", CultureInfo.InvariantCulture) + " m/s (enhanced)"));
-        Page("Label", "Particle counts prove spawning; submitted counts prove queuing, not GPU visibility. Both modes use Keen's LDR billboard renderer.");
-        Page("Button", "Show Status", (Action)FinalFrontierStatus.Show, "Full Final Frontier diagnostics, including the star dust hook.");
     }
 
     internal static void Dispose()

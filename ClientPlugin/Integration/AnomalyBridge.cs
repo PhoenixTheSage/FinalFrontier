@@ -254,9 +254,6 @@ static class AnomalyBridge
         Page("Slider", "Glow golden tint", 0f, 1f, (Func<float>)(() => Config.Current.SunGlowGoldStrength),
             (Action<float>)(v => Config.Current.SunGlowGoldStrength = v), "From world sunlight colour to the sun's golden palette; adapts automatically for HDR.", .05f);
         Page("Button", "Reset sun glow", (Action)(() => { Config.Current.ResetSunGlow(); Page("Refresh"); }), "Restore glow defaults without changing the surface, animation or flare strands.");
-        Page("Button", "Show Status", (Action)FinalFrontierStatus.Show,
-            "Celestial + Atmosphere + shared-volume StatusLine and shadow gates.");
-        Page("Label", "Status", (Func<string>)(() => Status));
         Page("Button", "Retry shaders", (Action)(() => Call(host, "Retry", Id)), "Recompile both views after fixing an asset.");
     }
     public static void Dispose()

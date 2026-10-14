@@ -20,11 +20,14 @@ internal static class FinalFrontierStatus
         get
         {
             var sb = new StringBuilder();
+            sb.AppendLine(PluginStatusPage.RendererLine);
             AppendCelestial(sb);
             sb.AppendLine();
             AppendAtmosphere(sb);
             sb.AppendLine();
             AppendStarDust(sb);
+            sb.AppendLine();
+            sb.AppendLine(Map.MapRuntime.Status);
             sb.AppendLine();
             AppendSharedVolume(sb);
             sb.AppendLine();

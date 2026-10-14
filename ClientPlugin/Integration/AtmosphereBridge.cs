@@ -13,7 +13,7 @@ internal static class AtmosphereBridge
 {
     const string Id="FinalFrontier.Atmosphere";
     static Type host,terminal;
-    static object page,statusPage;
+    static object page;
     static string shader;
     static bool registered;
     static int nextRefresh;
@@ -30,7 +30,6 @@ internal static class AtmosphereBridge
             if(!registered) registered=(bool)AnomalyBridge.Call(host,"Register",Id,shader,Array.Empty<string>());
             if(!registered) { Status="Atmosphere provider registration failed"; return; }
             if(page==null) CreatePage();
-            if(statusPage==null) CreateStatusPage();
             var config=Config.Current;
             MyPlanet planet=null;
             double best=double.MaxValue;
@@ -61,10 +60,9 @@ internal static class AtmosphereBridge
                 AnomalyBridge.Call(host,"Configure",(int)config.AtmosphereQuality,config.FogDistance,(int)config.AtmosphereDebugView);
             }
             Status=!config.AtmosphereEnabled?"Disabled (acceptance build)":!active?"Outside an eligible atmosphere":(string)host.GetProperty("StatusLine").GetValue(null);
-            if((page!=null || statusPage!=null) && (nextRefresh==0 || unchecked(Environment.TickCount-nextRefresh)>=0))
+            if(page!=null && (nextRefresh==0 || unchecked(Environment.TickCount-nextRefresh)>=0))
             {
                 if(page!=null) Page(page,"Refresh");
-                if(statusPage!=null) Page(statusPage,"Refresh");
                 nextRefresh=unchecked(Environment.TickCount+1000);
             }
         }
@@ -101,21 +99,6 @@ internal static class AtmosphereBridge
         Page(page,"Color","Tint",(Func<Color>)(()=>new Color(c.FogRed,c.FogGreen,c.FogBlue)),(Action<Color>)(v=>{var rgb=v.ToVector3();c.FogRed=rgb.X;c.FogGreen=rgb.Y;c.FogBlue=rgb.Z;}),"Scattering colour.");
         Page(page,"Category","Diagnostics");
         Page(page,"Dropdown","Debug view",typeof(AtmosphereDebug),(Func<object>)(()=>c.AtmosphereDebugView),(Action<object>)(v=>c.AtmosphereDebugView=(AtmosphereDebug)v),"Inspect density, blockers, cloud light, rooms, cascade coverage and rejected history. Only after Shared volume active.");
-        Page(page,"Label","Status",(Func<string>)(()=>Status));
-        Page(page,"Button","Show Status",(Action)FinalFrontierStatus.Show,"Full celestial + volume StatusLine / shadow gates.");
-    }
-    static void CreateStatusPage()
-    {
-        terminal ??= AnomalyBridge.Find("ClientPlugin.RichHud.TerminalConfigRegistry");
-        if(terminal==null) return;
-        statusPage=AnomalyBridge.Call(terminal,"RequestFolderPage","Final Frontier","Status");
-        if(statusPage==null) return;
-        Page(statusPage,"Category","Live diagnostics");
-        Page(statusPage,"Label","Celestial",(Func<string>)(()=>AnomalyBridge.Status));
-        Page(statusPage,"Label","Atmosphere",(Func<string>)(()=>Status));
-        Page(statusPage,"Label","Star Dust",(Func<string>)(()=>StarDust.StarDustRuntime.Status));
-        Page(statusPage,"Label","Dump",(Func<string>)(()=>FinalFrontierStatus.CurrentText));
-        Page(statusPage,"Button","Show Status window",(Action)FinalFrontierStatus.Show,"Opens a scrollable dump for copy/screenshot.");
     }
     internal static void Dispose()
     {
@@ -123,8 +106,7 @@ internal static class AtmosphereBridge
         if(terminal!=null)
         {
             AnomalyBridge.Call(terminal,"UnregisterPage","Final Frontier/Atmosphere");
-            AnomalyBridge.Call(terminal,"UnregisterPage","Final Frontier/Status");
         }
-        registered=false;page=statusPage=null;host=terminal=null;
+        registered=false;page=null;host=terminal=null;
     }
 }
