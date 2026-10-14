@@ -25,6 +25,8 @@ static class AnomalyBridge
     static int dirty = 1, nextAttempt;
     static float lastDayOcclusion = -1;
     static float lastAirImmersion = -1;
+    static MethodInfo displayProgramStatus;
+    internal static bool HdrSolarPalette { get; private set; }
     static readonly float[] patternAlpha = new float[16];
     static readonly float[] patternFocusStart = new float[16];
     static readonly bool[] patternFocused = new bool[16];
@@ -43,6 +45,18 @@ static class AnomalyBridge
     }
     public static void Update()
     {
+        if (AnomalyRenderer.LinuxRequiresGuest || !AnomalyRenderer.Decided)
+        {
+            if (AnomalyRenderer.LinuxRequiresGuest && !registered)
+                Status = "Linux stays idle until Anomaly's Vulkan guest bus is open";
+            return;
+        }
+        if (!AnomalyRenderer.AllowDx11Device && !AnomalyRenderer.AllowGuestWork)
+        {
+            if (!registered)
+                Status = "Celestial draws closed (" + AnomalyRenderer.ActiveName + ")";
+            return;
+        }
         try
         {
             if (!registered)
@@ -83,11 +97,13 @@ static class AnomalyBridge
             for (int i = 0; i < guides.FigureCount && i < patternAlpha.Length; i++)
                 if (patternAlpha[i] > 0.01f) { anyPatternLive = 1f; break; }
             bool configDirty = Interlocked.Exchange(ref dirty, 0) != 0;
+            bool hdrPalette = ReadHdrDisplay();
+            bool displayChanged = hdrPalette != HdrSolarPalette;
             // Live altitude/sun/pattern fade must track every frame; config still uses dirty.
             bool liveFade = config.ConstellationDelayedPattern
                 || Math.Abs(dayOcclusion - lastDayOcclusion) > 0.004f
                 || Math.Abs(airImmersion - lastAirImmersion) > 0.004f;
-            if (configDirty || liveFade)
+            if (configDirty || liveFade || displayChanged)
             {
                 lastDayOcclusion = dayOcclusion;
                 lastAirImmersion = airImmersion;
@@ -104,12 +120,22 @@ static class AnomalyBridge
                     config.ConstellationDelayedPattern ? 1f : 0f, config.ConstellationPatternDelay,
                     patternAlpha[0], patternAlpha[1], patternAlpha[2], patternAlpha[3],
                     patternAlpha[4], patternAlpha[5], patternAlpha[6], patternAlpha[7],
-                    patternAlpha[8], anyPatternLive
+                    patternAlpha[8], anyPatternLive,
+                    config.SunSurfaceDetail, config.SunAnimationSpeed,
+                    config.SunCoronaStrength, config.SunFlareHeight,
+                    config.SunGranulationScale, config.SunGoldStrength,
+                    hdrPalette ? 1f : 0f,
+                    config.SunGlowEnabled ? 1f : 0f, config.SunGlowStrength,
+                    config.SunGlowRadius, config.SunGlowFalloff,
+                    config.SunGlowAtmosphereExpansion, config.SunGlowGoldStrength
                 };
                 Call(host, "SetUniforms", Id, uniforms);
+                HdrSolarPalette = hdrPalette;
                 if (configDirty)
                 {
-                    Call(host, "SetNativeSunGlare", Id, config.NativeSunGlare);
+                    // One owner: old XML NativeSunGlare=true must not reintroduce
+                    // the overlapping native halo. Anomaly restores it on fallback.
+                    Call(host, "SetNativeSunGlare", Id, false);
                     Call(host, "SetEnabled", Id, config.Enabled);
                     if (page != null) Page("Refresh");
                 }
@@ -131,6 +157,23 @@ static class AnomalyBridge
             if (candidate.Name == method && candidate.GetParameters().Length == args.Length)
                 return candidate.Invoke(null, args);
         throw new MissingMethodException(type.FullName, method);
+    }
+    // GAP: Slice AI — Anomaly has no structured display colour-mode contract.
+    // Use the public status of the known HDR display program, never the presence
+    // of an HDR assembly or an arbitrary Display tenant. Missing/off/failed = SDR.
+    internal static bool ReadHdrDisplay()
+    {
+        try
+        {
+            displayProgramStatus ??= Find("ClientPlugin.Shaders.FullscreenPassRegistry")?.GetMethod(
+                "TryGetProgramStatus", BindingFlags.Public | BindingFlags.Static, null,
+                new[] { typeof(string), typeof(string).MakeByRefType() }, null);
+            if (displayProgramStatus == null) return false;
+            var args = new object[] { "hdr.tonemap", null };
+            return (bool)displayProgramStatus.Invoke(null, args)
+                && args[1] is string status && status.StartsWith("live ", StringComparison.Ordinal);
+        }
+        catch { return false; }
     }
     static object Page(string method, params object[] args)
     {
@@ -178,13 +221,39 @@ static class AnomalyBridge
             (Action<bool>)(v => Config.Current.ConstellationDelayedPattern = v), "Hide stick lines and rings until you look at a figure (same zone as names), then fade them in after a delay. Off = always show connections.");
         Page("Slider", "Pattern delay (s)", 0f, 5f, (Func<float>)(() => Config.Current.ConstellationPatternDelay),
             (Action<float>)(v => Config.Current.ConstellationPatternDelay = v), "Seconds after look-at before lines and rings begin fading in. Names still appear immediately.");
-        Page("Checkbox", "Native sun glare", (Func<bool>)(() => Config.Current.NativeSunGlare),
-            (Action<bool>)(v => Config.Current.NativeSunGlare = v), "Turn off to isolate the orange ring. Other light flares and gameplay sunlight are unchanged.");
         Page("Slider", "Sun brightness", 0f, 5f, (Func<float>)(() => Config.Current.SunBrightness),
             (Action<float>)(v => Config.Current.SunBrightness = v), "Disc radiance multiplier.");
         // Step must be passed — Anomaly's no-step Slider overload defaults to 1°.
         Page("Slider", "Sun radius (degrees)", 0.02f, 2f, (Func<float>)(() => Config.Current.SunRadiusDegrees),
             (Action<float>)(v => Config.Current.SunRadiusDegrees = v), "Angular radius, not diameter. Real sun ≈ 0.27°.", 0.005f);
+        Page("Category", "Solar surface and flare bands");
+        Page("Slider", "Surface detail", 0f, 1f, (Func<float>)(() => Config.Current.SunSurfaceDetail),
+            (Action<float>)(v => Config.Current.SunSurfaceDetail = v), "Luminous granulation and flowing plasma veins on a sphere; no dark sunspots.", .05f);
+        Page("Slider", "Solar animation speed", 0f, 3f, (Func<float>)(() => Config.Current.SunAnimationSpeed),
+            (Action<float>)(v => Config.Current.SunAnimationSpeed = v), "Rotation, evolving surface plasma and travelling flare bands. Zero freezes every solar animation.", .05f);
+        Page("Slider", "Corona and flare strength", 0f, 2f, (Func<float>)(() => Config.Current.SunCoronaStrength),
+            (Action<float>)(v => Config.Current.SunCoronaStrength = v), "Animated plasma arches and flare strands. Glow is controlled separately below.", .05f);
+        Page("Slider", "Flare height (solar radii)", .02f, .35f, (Func<float>)(() => Config.Current.SunFlareHeight),
+            (Action<float>)(v => Config.Current.SunFlareHeight = v), "Maximum loop height above the sphere, relative to the sun radius.", .01f);
+        Page("Slider", "Granulation scale", 8f, 60f, (Func<float>)(() => Config.Current.SunGranulationScale),
+            (Action<float>)(v => Config.Current.SunGranulationScale = v), "Surface detail frequency. Detail is filtered as the sun shrinks on screen.", 1f);
+        Page("Slider", "Golden colour strength", 0f, 1f, (Func<float>)(() => Config.Current.SunGoldStrength),
+            (Action<float>)(v => Config.Current.SunGoldStrength = v), "Golden plasma with hotter pale-yellow highlights, adapted automatically for SDR or HDR output. Zero retains the world's sun colour.", .05f);
+        Page("Category", "Sun glow");
+        Page("Label", "One filled glow replaces Keen's solar lens flare and the former rim halos. Scene bloom may still spread its light.");
+        Page("Checkbox", "Glow enabled", (Func<bool>)(() => Config.Current.SunGlowEnabled),
+            (Action<bool>)(v => Config.Current.SunGlowEnabled = v), "Off removes this glow. It does not restore the overlapping native solar flare or hide plasma strands.");
+        Page("Slider", "Glow strength", 0f, 2f, (Func<float>)(() => Config.Current.SunGlowStrength),
+            (Action<float>)(v => Config.Current.SunGlowStrength = v), "Additive radiance relative to the sun. Zero removes the glow.", .01f);
+        Page("Slider", "Glow radius (solar radii)", .5f, 24f, (Func<float>)(() => Config.Current.SunGlowRadius),
+            (Action<float>)(v => Config.Current.SunGlowRadius = v), "Half-strength radius measured from the centre. Scales with the sun and zoom.", .25f);
+        Page("Slider", "Glow falloff", 1f, 4f, (Func<float>)(() => Config.Current.SunGlowFalloff),
+            (Action<float>)(v => Config.Current.SunGlowFalloff = v), "1 = long soft tail; 2 = Gaussian; 4 = flatter centre and steeper fade. No hollow centre.", .1f);
+        Page("Slider", "Glow atmosphere expansion", 0f, 4f, (Func<float>)(() => Config.Current.SunGlowAtmosphereExpansion),
+            (Action<float>)(v => Config.Current.SunGlowAtmosphereExpansion = v), "Extra width beneath an atmosphere. 0 keeps space width; 1 doubles it at full immersion.", .1f);
+        Page("Slider", "Glow golden tint", 0f, 1f, (Func<float>)(() => Config.Current.SunGlowGoldStrength),
+            (Action<float>)(v => Config.Current.SunGlowGoldStrength = v), "From world sunlight colour to the sun's golden palette; adapts automatically for HDR.", .05f);
+        Page("Button", "Reset sun glow", (Action)(() => { Config.Current.ResetSunGlow(); Page("Refresh"); }), "Restore glow defaults without changing the surface, animation or flare strands.");
         Page("Button", "Show Status", (Action)FinalFrontierStatus.Show,
             "Celestial + Atmosphere + shared-volume StatusLine and shadow gates.");
         Page("Label", "Status", (Func<string>)(() => Status));
@@ -206,6 +275,8 @@ static class AnomalyBridge
         registered = false; catalogue = null; guides = default; guideStart = 0; page = null; host = null; terminal = null;
         lastDayOcclusion = -1;
         lastAirImmersion = -1;
+        displayProgramStatus = null;
+        HdrSolarPalette = false;
         Array.Clear(patternAlpha, 0, patternAlpha.Length);
         Array.Clear(patternFocusStart, 0, patternFocusStart.Length);
         Array.Clear(patternFocused, 0, patternFocused.Length);

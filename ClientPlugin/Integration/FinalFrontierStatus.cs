@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using ClientPlugin.Gui;
+using ClientPlugin.StarDust;
 using Sandbox.Graphics.GUI;
 
 namespace ClientPlugin.Integration;
@@ -23,6 +24,8 @@ internal static class FinalFrontierStatus
             sb.AppendLine();
             AppendAtmosphere(sb);
             sb.AppendLine();
+            AppendStarDust(sb);
+            sb.AppendLine();
             AppendSharedVolume(sb);
             sb.AppendLine();
             AppendNotes(sb);
@@ -40,6 +43,15 @@ internal static class FinalFrontierStatus
         sb.Append("     enabled ").Append(Yes(c.Enabled));
         sb.Append(" · sun ").Append(Yes(c.SunEnabled));
         sb.Append(" · radius ").Append(F(c.SunRadiusDegrees)).AppendLine(" deg");
+        sb.Append("     solar detail ").Append(F(c.SunSurfaceDetail));
+        sb.Append(" · animation ").Append(F(c.SunAnimationSpeed));
+        sb.Append(" · corona ").Append(F(c.SunCoronaStrength));
+        sb.Append(" · flare height ").Append(F(c.SunFlareHeight)).AppendLine(" radii");
+        sb.Append("     solar display palette ").AppendLine(AnomalyBridge.HdrSolarPalette ? "HDR gold" : "SDR gold");
+        sb.Append("     unified sun glow ").Append(Yes(c.SunGlowEnabled));
+        sb.Append(" · strength ").Append(F(c.SunGlowStrength));
+        sb.Append(" · radius ").Append(F(c.SunGlowRadius)).Append(" radii");
+        sb.Append(" · falloff ").Append(F(c.SunGlowFalloff)).AppendLine();
         sb.Append("     bridge ").AppendLine(Empty(AnomalyBridge.Status));
     }
 
@@ -64,6 +76,17 @@ internal static class FinalFrontierStatus
         sb.Append("     Requested ").AppendLine(Empty(ReadStaticProp("ClientPlugin.Shaders.VolumetricMediumRegistry", "Requested")));
         sb.Append("     Shadows ").AppendLine(Empty(ReadStaticProp("ClientPlugin.ShaderFramework.DirectionalVolumeShadows", "Status")));
         sb.Append("     MSAA ").AppendLine(Empty(ReadMsaa()));
+    }
+
+    static void AppendStarDust(StringBuilder sb)
+    {
+        sb.AppendLine("Star Dust (Keen movement-dust producer)");
+        sb.Append("     mode ").Append(Config.Current.StarDustMode).Append(" · preset ").AppendLine(Config.Current.StarDustPreset.ToString());
+        sb.Append("     hook ").AppendLine(StarDustRuntime.Status);
+        sb.Append("     active ").Append(StarDustRuntime.ActiveCount).Append(" / world capacity ").Append(StarDustRuntime.PoolCapacity);
+        sb.Append(" · last enhanced speed ").Append(F(StarDustRuntime.Speed)).AppendLine(" m/s");
+        sb.Append("     billboards submitted ").Append(StarDustRuntime.SubmittedCount);
+        sb.Append(" last draw · draw calls ").Append(StarDustRuntime.DrawCalls).AppendLine();
     }
 
     static void AppendNotes(StringBuilder sb)

@@ -223,10 +223,6 @@
       <HintPath>$(Bin64Dir)VRage.Render.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="VRage.Render11, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>$(Bin64Dir)VRage.Render11.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="VRage.Scripting, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>$(Bin64Dir)VRage.Scripting.dll</HintPath>
       <Private>False</Private>

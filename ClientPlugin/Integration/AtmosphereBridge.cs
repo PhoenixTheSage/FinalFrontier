@@ -113,6 +113,7 @@ internal static class AtmosphereBridge
         Page(statusPage,"Category","Live diagnostics");
         Page(statusPage,"Label","Celestial",(Func<string>)(()=>AnomalyBridge.Status));
         Page(statusPage,"Label","Atmosphere",(Func<string>)(()=>Status));
+        Page(statusPage,"Label","Star Dust",(Func<string>)(()=>StarDust.StarDustRuntime.Status));
         Page(statusPage,"Label","Dump",(Func<string>)(()=>FinalFrontierStatus.CurrentText));
         Page(statusPage,"Button","Show Status window",(Action)FinalFrontierStatus.Show,"Opens a scrollable dump for copy/screenshot.");
     }

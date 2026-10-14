@@ -1,8 +1,32 @@
 # Final Frontier
 
-Client-side celestial rendering for Space Engineers through Anomaly. The current implementation draws 41,394 Hipparcos stars and an analytic sun disc, with a matching star background in reflection probes. Limiting magnitude (default 6.5), brightness and approximate star colour strength adjust live. Optional constellation highlight rings and stick-figure lines follow IAU / Alan MacRobert patterns; fantasy star boosts, look-at name headers and colored fantasy art overlays default on for the main view and stay out of probes. See [catalogue details and data licensing](Docs/Catalogue.md).
+**Ctrl+Shift+F2** opens a resizable RHUD 3D map of client-known grids, planets/moons
+and asteroids/voxel bodies. Explore with wheel zoom, right-drag orbit and
+middle-drag pan; select proxies or use the scrollable object list. Ordinary
+grid and voxel contacts follow ownership and player-centered range rules;
+client-known planets/moons appear without admin reveal at any distance.
+Asteroids use diamond wireframes. Admin reveal is an explicit session-only
+toggle for other objects. Requires updated Anomaly and Rich HUD Master.
+Rebind or clear **Map toggle** in Pulsar settings; colors and range also live at
+**Anomaly Shaders → Final Frontier → Map**. See [map controls and validation](Docs/Map.md).
+Automated checks pass; in-game visuals and hardware timing remain pending.
 
-Settings are available in Pulsar and under **Anomaly Shaders → Final Frontier → Settings** when Rich HUD Master is present. Disable the provider to restore the world sky. Gameplay sunlight is unchanged; the vanilla sun flare remains during this phase. MSAA uses vanilla fallback.
+Client-side celestial rendering for Space Engineers through Anomaly. The current implementation draws 41,394 Hipparcos stars and an animated procedural sun, with a matching star background in reflection probes. Limiting magnitude (default 6.5), brightness and approximate star colour strength adjust live. Optional constellation highlight rings and stick-figure lines follow IAU / Alan MacRobert patterns; fantasy star boosts, look-at name headers and colored fantasy art overlays default on for the main view and stay out of probes. See [catalogue details and data licensing](Docs/Catalogue.md).
+
+Settings are available in Pulsar and under **Anomaly Shaders → Final Frontier → Settings** when Rich HUD Master is present. Disable the provider to restore the world sky. Gameplay sunlight is unchanged; the active replacement owns the solar glow and suppresses Keen's overlapping solar lens flare. MSAA uses vanilla fallback.
+
+The **Solar surface and flare bands** section adds a golden, granular plasma
+surface with fine granulation, luminous fibrils and evolving flux bundles around the rim. Detail,
+animation speed, corona strength, flare height, granulation and colour controls
+apply live. The surface has no dark sunspot mask. Solar gold adapts to the active
+HDR display pass. **Settings → Sun glow** controls one filled glow: enable,
+strength, half-strength radius, falloff, atmospheric expansion and golden tint,
+with a separate reset. Former smooth rim halos have been removed; animated
+strands retain their own controls. Restart with both updated Anomaly and
+FinalFrontier so native-flare ownership covers worker scheduling. See [solar rendering and the
+Blender MCP authoring and actual shader preview workflow](Docs/SolarPlasma.md).
+The SDR surface has user acceptance; revised HDR colour/glow and
+temporal/performance acceptance remain pending.
 
 See [the implementation plan](Docs/EnvironmentRenderingPlan.md), [current validation and next steps](Docs/IntegrationSpike.md), and [the repeatable D3D11 smoke test](Tests/Run-CelestialSmokeTests.ps1). The initial sky/sun replacement, zoom and day/night tracking have been validated in-game. The new catalogue needs its own visual/performance pass; the FG-related orange sun ring and motion brightening were confirmed fixed.
 
@@ -12,6 +36,18 @@ Restart the normal Pulsar source launch to pick up changes. Enable Atmosphere in
 atmosphere; it defaults off pending acceptance. Native/FSR/DLSS/FG scene testing and the
 GTX 1070 Ti performance target remain unverified. See Anomaly's `Docs/SharedVolumetrics.md`
 for the acceptance checklist and timing-log collection. Existing star/sun controls remain separate.
+
+**Anomaly Shaders → Final Frontier → Star Dust** adds Vanilla, Enhanced and Off
+modes for Keen's movement dust. Enhanced includes Subtle, Cinematic and High
+Speed presets, density/range/lifetime controls, speed response, streak sizing,
+tint, brightness, fades, location gates and live diagnostics for active particles
+and submitted billboards. Updated Anomaly restores billboard pixel bindings after
+DLSS/FSR output-depth preparation, fixing a reproduced invisible-particle path
+shared by Vanilla and Enhanced. It reuses the
+world's particle pool and native depth-tested billboard renderer. Vanilla is
+the default pending in-game visual acceptance. See [the source trace, controls
+and validation checklist](Docs/StarDust.md). Restart the normal Pulsar source
+launch to load the page; subsequent setting changes apply live.
 
 The remaining template documentation describes the inherited build and loader setup.
 

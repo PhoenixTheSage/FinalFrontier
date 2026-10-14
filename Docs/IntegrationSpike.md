@@ -40,7 +40,43 @@ The smoke script discovers FXC and the installed shader directory; explicit `-Fx
 
 - Phase 2 implemented: real Hipparcos catalogue, persistent IDs, spatial indexing and pixel-integrated profiles. See [catalogue validation](Catalogue.md); in-game catalogue validation remains pending.
 - Phase 3: finish real-game reflections/temporal compatibility and address any demonstrated sky motion issue. The existing depth-zero velocity code is not changed without evidence. MSAA needs a sample-aware design.
-- Phase 4: surface granulation/activity, corona and partial-disc visibility. Sun-only glare isolation has been brought forward for ring diagnosis. The prototype retains vanilla flare and does not change light intensity/shadow softness.
+- Phase 4: surface granulation/activity and animated corona are implemented. Unified glow now owns the native solar flare; partial-disc visibility remains open. Light intensity/shadow softness are unchanged.
 - Phase 5: constellation guides and projected HUD labels. Projected labels are not provided by the existing corner-text overlay API.
 
 2026-09-18 user validation: replacement, live star brightness, high zoom, sun sizing and Keen day/night tracking passed. User approved proceeding to the catalogue. The orange exposure-dependent sun ring remains open. This does not establish the remaining reflection, device-lifecycle or temporal/upscaler checks as passed.
+
+2026-10-02 solar plasma implementation: the analytic photosphere now has a
+procedural luminous surface and sphere-anchored animated prominence bands,
+with live settings and a WARP-generated preview. The Blender MCP refinement
+adds a 4K Cycles reference, fine plasma and evolving noise-masked flux bundles,
+with a circular halo in the game shader. All 54 expanded D3D11 checks
+pass, and both plugin targets build. This is headless shader validation;
+in-game bloom/exposure, hardware cost and temporal/upscaler acceptance remain
+pending. See [the solar implementation and validation notes](SolarPlasma.md).
+
+Earlier 2026-10-02 SDR/HDR follow-up (glow approach superseded below): user accepts the SDR surface. HDR now selects a
+luminance-preserving golden palette while the known HDR display program is
+live; SDR keeps its surface palette. The aureole's inner cutout and limb peak
+are replaced with a filled, circular, outward-fading glow. Native sun glare
+retains the user's setting. Seventy-eight WARP checks include radial monotonicity
+and the actual HDR shader at 600/1000/2000 nit peaks; seventy-two integration
+checks include live/off/failed mode detection and uniform updates with unchanged
+settings. Both targets build without deployment. In-game HDR colour/glow and
+temporal acceptance remain pending. The shared display-mode metadata gap is filed
+in Anomaly Slice AI; the current public-status workaround is explicitly labeled.
+
+2026-10-02 unified-glow follow-up: the user reports the hollow ring remains beside
+a new tight halo, invalidating the shader-only fix. FinalFrontier now replaces
+native solar glare and all former smooth rim layers with one filled, additive
+profile. RHUD's **Settings → Sun glow** controls enable, strength, radius, falloff,
+atmospheric expansion and tint; reset affects only glow. Legacy glare flags cannot
+reenable the overlapping layer. Anomaly now accepts the current or previous
+successful main draw because Keen's transparent-flare worker can record before
+the current main draw. Initial activation and already-recorded work can have one
+transition frame; stale readiness expires and fallback restores native handling.
+Eighty-seven WARP checks, eighty-four integration checks and twenty-four actual
+host registry/prefix checks on each runtime pass. Both plugins build with
+deployment disabled. Restart both through the normal Pulsar source launch.
+Headless checks and preview inspection do not establish in-game HDR/glow,
+hardware performance or temporal acceptance. See [current solar controls and
+validation](SolarPlasma.md) and Anomaly's `Tests/CelestialGlare/README.md`.

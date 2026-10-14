@@ -11,7 +11,7 @@ public enum AtmosphereStyle { Clear, Dramatic, HeavyFantasy }
 public enum AtmosphereQuality { Performance, High, Ultra }
 public enum AtmosphereDebug { None, Density, GeometryVisibility, CloudTransmittance, InteriorMasks, CascadeCoverage, TemporalRejection }
 
-public class Config : INotifyPropertyChanged
+public partial class Config : INotifyPropertyChanged
 {
     public readonly string Title = "Final Frontier";
     public static readonly Config Default = new Config();
@@ -21,7 +21,7 @@ public class Config : INotifyPropertyChanged
     float limitingMagnitude = 6.5f, starColorStrength = 0.65f;
     float starProfileWidth = 1.5f;
     float starCoreSharpness = 3f, starTwinkleStrength = 0.6f, starTwinkleSpeed = 1f;
-    bool nativeSunGlare = true;
+    bool nativeSunGlare;
     bool constellationLines = true, constellationFantasy = true;
     bool constellationNames = true, constellationArt = true;
     bool constellationDelayedPattern = true;
@@ -56,7 +56,8 @@ public class Config : INotifyPropertyChanged
     public bool ConstellationDelayedPattern { get => constellationDelayedPattern; set => Set(ref constellationDelayedPattern, value); }
     [Slider(0, 5, 0.05f, SliderAttribute.SliderType.Float, description: "Seconds after look-at before stick lines and rings begin fading in. Names still appear immediately.")]
     public float ConstellationPatternDelay { get => constellationPatternDelay; set => Set(ref constellationPatternDelay, Clamp(value, 0, 5, 1)); }
-    [Checkbox(description: "Retain Keen's sun glare. Turn off to isolate the orange ring; other lights are unaffected.")]
+    // Legacy XML compatibility only. Unified solar glow always owns the native
+    // solar flare while replacement is active, including for old configs = true.
     public bool NativeSunGlare { get => nativeSunGlare; set => Set(ref nativeSunGlare, value); }
     [Checkbox(description: "Draw the analytic sun disc. Gameplay sunlight is unchanged.")]
     public bool SunEnabled { get => sunEnabled; set => Set(ref sunEnabled, value); }

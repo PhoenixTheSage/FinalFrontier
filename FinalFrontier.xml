@@ -29,6 +29,7 @@ Client-side Hipparcos stars and analytic sun through Anomaly, with matching prob
     <DependencyIds>
       <Id>A9C29274-E447-49EE-881B-C980E6D190FD</Id>
     </DependencyIds>
+    <Platforms>Windows,Linux</Platforms>
     <Asset Name="Celestial" Path="Assets/Celestial" />
 
     <!-- To specify asset files to be copied onto disk, use the AssetFolder tag.

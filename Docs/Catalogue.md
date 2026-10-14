@@ -56,7 +56,10 @@ Next in-game pass: brightness/density at native resolution, slow camera pans,
 extreme zoom, constellation recognition, frame cost, refreshed reflections,
 and temporal/upscaler behavior. Software checks do not establish game GPU cost.
 
-## Orange sun band: open investigation
+## Orange sun band: historical investigation
+
+The following September notes describe the earlier isolation controls. Current
+solar glow ownership and RHUD controls supersede them; see [SolarPlasma.md](SolarPlasma.md).
 
 The user validated replacement, live star brightness, high zoom, sun size and
 Keen day/night tracking on 2026-09-18. An erratic orange ring changes apparent
@@ -90,10 +93,10 @@ strength sets linear-HDR modulation depth, speed scales the per-star tempo.
 Probes stay static so reflections do not shimmer. Bright catalogue entries are
 only mildly damped so depth remains visible under HDR bloom.
 
-**Native sun glare** defaults on for comparison. Turn it off to remove only
+The earlier **Native sun glare** control defaulted on for comparison. It removed only
 Keen's solar glare while retaining the procedural disc and other lights.
 Anomaly captures the exact solar light ID, gates suppression on a successful
-main replacement in the same frame, and restores vanilla on disabled/failed/
+main replacement in the same frame, and restored vanilla on disabled/failed/
 conflicting provider or device release. No saved world definition is changed.
 This brings the isolation part of phase 4 forward; replacement corona/rays and
 partial-disc visibility remain deferred.
@@ -112,6 +115,8 @@ Turning FG off removes both the orange ring and motion brightening. The earlier
 FSR attribution was a hypothesis and is superseded. SE-FG now fixes demonstrated
 linear-light quantization in its SDR interpolation UAV (RGBA16F replaces 8-bit
 UNORM), with a failing-before/passing-after production-pipeline WARP regression.
-In-game confirmation of both symptoms is pending. Profile width and native-glare
-controls remain available, but are not the root-cause fix; do not disable the
-sun glare as a required workaround. See SE-FG README for evidence and tests.
+These earlier FG artifacts were later confirmed fixed in-game (see this project's
+README). Native-glare suppression is not required to fix FG quantization. The
+October unified-glow work separately takes ownership of solar glare and removes
+the old comparison toggle to prevent overlapping halos. See SE-FG README for the
+FG evidence and tests; current glow acceptance remains pending.

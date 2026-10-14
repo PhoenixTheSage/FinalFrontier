@@ -371,4 +371,7 @@ MigrationBackup/
 .cursor/rules/se-profile-path.mdc
 .cursor/rules/se-test-gpu.mdc
 
+# Local knowledge-graph cache (not part of the plugin)
+/graphify-out/
+
 /Tools/Catalogue/.cache/
